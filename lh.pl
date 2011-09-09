@@ -24,9 +24,9 @@ if ( $cgi->param('url') ) {
 	my $mech = WWW::Mechanize -> new(agent => "NotBlocked/0.01");
 	my $html;
 	if ($cgi -> param('url') =~ /^http:\/\//) {
-		$html = $mech -> get($cgi -> param('url')) -> content();
+		$html = $mech -> get($cgi -> param('url')) -> decoded_content;
 	} else {
-		$html = $mech -> get("http://" . $cgi -> param('url')) -> content();
+		$html = $mech -> get("http://" . $cgi -> param('url')) -> decoded_content;
 	}
 	print $html;
 	# >>>>>>>>>>>>>>>>>>>>>>> CouchDB
