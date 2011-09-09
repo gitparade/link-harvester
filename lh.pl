@@ -16,9 +16,11 @@ my $cgi = CGI->new();
 
 print
 	$cgi->header('text/html'),
+	"<div style='z-index : 1000; position : fixed; top : 0; left : 0;'>",
 	$cgi->start_form,
 	$cgi->textfield('url'),
-	$cgi->submit('');
+	$cgi->submit(''),
+	"</div>";
 
 if ( $cgi->param('url') ) {
 	my $mech = WWW::Mechanize -> new(agent => "NotBlocked/0.01");
