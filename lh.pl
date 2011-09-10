@@ -46,8 +46,15 @@ if ( $cgi->param('url') ) {
 }
 
 sub display {
+	my $repeat = int(rand(3)) + 1;
 	foreach (1..50) {
-		printf "<div style='font-size : xx-large; z-index : 0; position : absolute; left : %s;'>", $_;
+		if ($repeat == 1) {
+			printf "<div style='font-size : xx-large; z-index : 0; position : absolute; left : %s;'>", $_;
+		} elsif ($repeat == 2) {
+			printf "<div style='font-size : xx-large; z-index : 0; position : absolute; top : %s;'>", $_;
+		} elsif ($repeat == 3) {
+			printf "<div style='font-size : xx-large; z-index : 0; position : absolute; top : %s; left : %s'>", $_, $_;
+		}
 		print $_[0];
 		print "</div>";
 	}
