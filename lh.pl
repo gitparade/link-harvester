@@ -8,7 +8,6 @@ binmode(STDOUT, ":utf8");
 use CGI qw/:standard :html4/;
 use CouchDB::Client;
 use WWW::Mechanize;
-use Data::Dumper;
 $CGI::DISABLE_UPLOADS = 1;
 
 # >>>>>>>>>>>>>>>>>>>>>>> Database name
@@ -26,26 +25,22 @@ print
 	$cgi->submit(''),
 	"</div>";
 
-if ( $cgi->param('url') ) {
-	my $mech = WWW::Mechanize -> new(agent => "NotBlocked/0.01");
-	my $http;
-	if ($cgi -> param('url') =~ /^http:\/\//) {
-		$http = $cgi -> param('url');
-	} else {
-		$http = "http://" . $cgi -> param('url');
-	}
-	my $html = $mech -> get($http) -> decoded_content;
-	my $text = $mech -> text();
-	&display($text);
-	# >>>>>>>>>>>>>>>>>>>>>>> CouchDB
-	my $client = CouchDB::Client -> new(uri => $couchdb_uri);
-	my $db = $client -> newDB($link_harvester_db_name);
-	my $doc = $db -> newDoc($http, undef, {html => $html});
-	$doc -> create;
-	# <<<<<<<<<<<<<<<<<<<<<<< CouchDB
+if ($cgi -> param('url')) {
+	(my $text, my $http, my $html) = &www_mechanize($cgi -> param('url'));
+	&write_text_to_browser($text);
+	# >>>>>>>>>>>>>>>>>>>>>>> Create CouchDB document
+	&key_is_url_field_is_html($http, $html);
+	# <<<<<<<<<<<<<<<<<<<<<<< with url and html
 }
 
-sub display {
+sub key_is_url_field_is_html {
+	my $client = CouchDB::Client -> new(uri => $couchdb_uri);
+	my $db = $client -> newDB($link_harvester_db_name);
+	my $doc = $db -> newDoc($_[0], undef, {html => $_[1]});
+	$doc -> create;
+}
+
+sub write_text_to_browser {
 	my $repeat = int(rand(3)) + 1;
 	foreach (1..50) {
 		if ($repeat == 1) {
@@ -58,4 +53,17 @@ sub display {
 		print $_[0];
 		print "</div>";
 	}
+}
+
+sub www_mechanize {
+	my $mech = WWW::Mechanize -> new(agent => "NotBlocked/0.01");
+	my $http;
+	if ($_[0] =~ /^http:\/\//) {
+		$http = $_[0];
+	} else {
+		$http = "http://" . $_[0];
+	}
+	my $html = $mech -> get($http) -> decoded_content;
+	my $text = $mech -> text();
+	($text, $http, $html);
 }
